@@ -1,0 +1,30 @@
+{% extends  'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block main %}
+<div class="card">
+    <div class="card-body">
+      <div class="row justify-content-center">
+
+        <div class="col-12 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+
+
+              <h4 class="card-title">Регистрация</h4>
+              <form method="POST" action="{% url 'registration:register' %}">
+
+                    {% csrf_token %}
+                      <input class="form-control form-control-sm" type="hidden" name="next" value="{{ next }}">
+                  <!-- <tr>
+                    <td>{{ form.password1.label_tag }}</td>
+                    <td>{{ form.password1 }}</td>
+                  </tr>
+                   -->
+                      {{ form|crispy}}
+
+                      <button type="submit" class="btn btn-primary btn-block" name='register'>Зарегистрироваться</button>
+              </form>
+        </div>
+      </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block title %} {{question.question_title}} {% endblock %}
+
+{% block content %}
+<!-- Шапка -->
+<div class="container-fluid">
+
+  <div class="row" style="background-color:#17a2b8!important">
+      <div class="col col-sm-6 col-md-6 col-lg-6 col-xl-6">
+      <h3>
+        <p class="bg-info text-white " style="padding-left:2%">
+          <a style="color:white" href="{% url 'registration:index' %}">Mathematics</a>
+        </p>
+      </h3>
+    </div>
+    <div class="col col-sm-4 col-md-4 col-lg-4 col-xl-4">
+
+    </div>
+    <div class="col col-sm-2 col-md-2 col-lg-2 col-xl-2" align="right" style="padding-right:25px">
+          <a href="{% url 'registration:index' %}" style="margin:1%" class="btn btn-dark">На главную</a>
+    </div>
+  </div>
+
+
+  <div class="row justify-content-center">
+    <div class="col" >
+      <br>
+      <p class="text-info" style="margin-left:3%">Условие задачи: {{question.question_text}}</p>
+    </div>
+    <div class="col" align="right" style="margin:1% ">
+          {% if request.user.is_authenticated %}
+          <form action="{% url 'mathem:change_question' question.id %}" method="POST">
+            {% csrf_token %}
+            <button type="submit">Редактировать задачу</button>
+
+          </form>
+
+          {% endif%}
+
+        </div>
+  </div>
+  <!-- Блок ответа и результата -->
+
+  <div class="row" style="margin-top:10px , background-color:#C0C0C0">
+    {% if request.user.is_authenticated %}
+        <div class="col-5 col-sm-5 col-md-5 col-lg-5 col-xl-5" >
+          <form action="{% url 'mathem:leave_answer' question.id %}" method="POST">
+            {% csrf_token %}
+
+            <input type="text" class="form-control form-control-sm w-50" required placeholder="Ваш ответ" name="answer" colls="30" , rows="1"><br>
+
+            <button type="submit" class="btn btn-outline-success">Оставить ответ</button>
+
+          </form>
+        </div>
+    {% else %}
+        <div class="col-5 col-sm-5 col-md-5 col-lg-5 col-xl-5" >
+          Зарегестрируйтесь, что бы решать задачи и смотреть\оставлять комментарии.
+        </div>
+    {% endif %}
+        <div class="col col-sm-5 col-md-5 col-lg-5 col-xl-5 align-self-start">
+                  {% if visible_ %}
+                      {% if get_result %}
+
+                          <p class=" alert alert-success w-50" role="alert" >
+                          <strong>Поздравляем!</strong>{{result}}
+                          </p>
+                      {% else %}
+                          <p class="alert alert-danger w-50" role="alert">
+                          <strong>Ошибка!</strong>{{result}}
+                          </p>
+                      {% endif %}
+                  {% endif %}
+        </div>
+        {% if is_admin %}
+        <div class="col col-sm-2 col-md-2 col-lg-2 col-xl-2">
+            <a class="btn btn-primary" href="{% url 'mathem:views_errors' question.id %}">Посмотреть отчет</a>
+        </div>
+          {%endif%}
+  </div>
+
+  <div class="row">
+    <div class="col">
+      <br><p>Комментарии: </p>
+    </div>
+  </div>
+  <!--  -->
+  {% if request.user.is_authenticated %}
+  <div class="row justify-content-around">
+
+        <div class="col-10 col-sm-10 col-md-10 col-lg-10 col-xl-10">
+
+                    <form action="{% url 'mathem:leave_comment' question.id %}" method="post">
+                      {% csrf_token %}
+                      <!-- <p>Имя пользователя: <input type="text" required name="name_author" value="{{request.user}}"> </p><br> -->
+                      <textarea class="form-control form-control-sm w-25" name="text_comment" required placeholder="Текст комментария" rows="5" cols="30"></textarea><br>
+                      <button class="btn btn-outline-success" type="submit" name="button">Оставить комментарий</button>
+                    </form>
+                    <br>
+                  {% if latest_comment_list %}
+                      {% for c in latest_comment_list %}
+                          <p class="text-sm-left">{{c.author_name}} <br>
+                            <em>{{c.pub_date}}</em></p>
+                          <p>{{c.comment_text}}</p>
+                          <hr>
+                      {% endfor %}
+                  {% else %}
+                    <p>Комментариев нет</p>
+                  {% endif %}
+
+        </div>
+          <!-- Сообщить об ошибке -->
+        <div class="col col-sm-2 col-md-2 col-lg-2 col-xl-2">
+          <button type="button" class="btn btn-primary w-95" data-toggle="modal" data-target="#exampleModalCentered">
+              Сообщить об ошибке
+          </button>
+
+                <!-- Modal -->
+                <div class="modal" id="exampleModalCentered" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenteredLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalCenteredLabel">Modal title</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                              </div>
+
+
+                                  <div class="modal-body">
+                                        <form action="{% url 'mathem:report_error' question.id %}" method="post">
+                                            {% csrf_token %}
+                                            <textarea type ='text' class="form-control mb-2 mr-sm-2" name="text_error" rows="5" cols="63"></textarea>
+                                            <button type="submit" class="btn btn-secondary">Отправить</button>
+                                        </form>
+
+                                  </div>
+
+                                  <!-- ОТправить ошибку -->
+                                  <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+
+                                    <!-- <a href="{% url 'mathem:report_error' question.id %}" class="btn btn-primary">ОТправить</a> -->
+
+                                  </div>
+
+
+                        </div>
+                    </div>
+                </div>
+      </div>
+
+  </div>
+  {%endif%}
+</div>
+
+
+</div>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+{% endblock %}

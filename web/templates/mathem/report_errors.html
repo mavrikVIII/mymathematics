@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %} Вопросы {% endblock %}
+{% block main %}
+<p>Тут представлены ошибки</p>
+{% endblock %}
+{% block content%}
+<div class="container-fluid">
+  <div class="row" style="background-color:#17a2b8!important" >
+      <div class="col col-sm-6 col-md-6 col-lg-6 col-xl-6">
+         <h3 >  <a style="color:white; padding-left:10px" href="{% url 'registration:index' %}">Mathematics</a> </h3>
+      </div>
+      {% if request.user.is_authenticated %}
+          <div class="col col-sm-4 col-md-4 col-lg-4 col-xl-4">
+                <a style="color:white " href="{% url 'registration:index' %}" style="margin:1%" >На главную</a>
+          </div>
+          <div class="col col-sm-2 col-md-2 col-lg-2 col-xl-2" align="right">
+              <a style="color:white " href="{% url 'registration:logout' %}">Выйти</a>
+          </div>
+      {% else %}
+          <div class="col col-sm-3 col-md-4 col-lg-4 col-xl-4" >
+                  <a  style="color:white " href="{% url 'registration:register' %}">Зарегистрироваться</a>
+          </div>
+          <div class="col col-sm-3 col-md-2 col-lg-2 col-xl-2" align = "right">
+
+                <a style="color:white "href="{% url 'registration:login' %}">Войти</a>
+          </div>
+      {% endif %}
+  </div>
+</div>
+
+<div class="container">
+            <div class="row">
+              <div class="col col-sm-1 col-md-1 col-lg-1 col-xl-1" align="center">
+                      id
+                </div>
+                <div class="col col-sm-3 col-md-3 col-lg-3 col-xl-3" align="center">
+                      username
+                </div>
+                <div class="col col-sm-2 col-md-2 col-lg-2 col-xl-2" align="center">
+                    Задача
+                </div>
+                <div class="col col-sm-4 col-md-4 col-lg-4 col-xl-4" align="center">
+                      Message
+                </div>
+                <div class="col col-sm-2 col-md-2 col-lg-2 col-xl-2" align="center">
+                      pub_date
+                </div>
+            </div>
+
+
+          {% for a in errors_all %}
+              <div class="row">
+                    <div class="col col-sm-1 col-md-1 col-lg-1 col-xl-1" align="center">{{ a.id }} </div>
+
+                    <div class="col col-sm-3 col-md-3 col-lg-3 col-xl-3" align= "center">{{ a.people_name }}</div>
+                    <div class="col col-sm-2 col-md-2 col-lg-2 col-xl-2" align = "center">
+                      <a href="{% url 'mathem:detail'  a.question.id %}"" style="color:blue">{{ a.question }} </a>
+                    </div>
+
+                      <div class="col col-sm-4 col-md-4 col-lg-4 col-xl-4">{{ a.people_message }}</div>
+
+                    <div class="col col-sm-2 col-md-2 col-lg-2 col-xl-2">{{ a.date_message }}</div>
+              </div>
+
+
+          {% endfor %}
+
+
+</div>
+{% endblock %}

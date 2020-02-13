@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %} Вопросы {% endblock %}
+
+{% block main %}
+<!-- Шапка -->
+
+<div class="container-fluir">
+    <div class="row" style="background-color:#17a2b8!important" >
+        <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+           <h3 >  <a style="color:white; padding-left:10px" href="{% url 'registration:index' %}">Mathematics</a> </h3>
+        </div>
+        {% if request.user.is_authenticated %}
+            <div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-5">
+
+            </div>
+            <div class="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-1" align="right" style="padding-right:45px" >
+                <a style="color:white " href="{% url 'registration:logout' %}">Выйти</a>
+            </div>
+        {% else %}
+            <div class="col col-sm-3 col-md-4 col-lg-4 col-xl-4" align="right">
+                    <a  style="color:white " href="{% url 'registration:register' %}">Зарегистрироваться</a>
+            </div>
+            <div class="col col-sm-3 col-md-2 col-lg-2 col-xl-1" align="right">
+
+                  <a style="color:white "href="{% url 'registration:login' %}">Войти</a>
+            </div>
+        {% endif %}
+    </div>
+
+
+
+    <div class="row justify-content-center">
+        <div class="col col-sm-6 col-md-6 col-lg-6 col-xl-6" align="center">
+            <h3 style="color:white">Добро пожаловать, {{user_name}}!</h3>
+        </div>
+
+    </div>
+{% endblock %}
+    <!-- Блок сайта -->
+    {% block content %}
+    <div class="row justify-content-center" >
+
+      <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6" align="center" style="background-color:grey; border-radius: 10px">
+
+
+            <div  >
+
+                {% if latest_question_list %}
+
+
+                      <div class="col col-sm-6 col-md-6 col-lg-6 col-xl-6" >
+                        <table align="center">
+                            {% for a in latest_question_list %}
+                          <tr align="center">
+                            <td style="color:white">  {{a.id}}. </td>
+                            <td><a style="color:white"href="{% url 'mathem:detail' a.id %}">{{a.question_title}}</a></td>
+                          </tr>
+                          {%endfor%}
+                        </table>
+                      </div>
+                {% else %}
+                    <div class="col col-sm-6 col-md-6 col-lg-6 col-xl-6">
+                          Задачи не найдены, Вы можете зарегестрироваться и добавить свои задачи.
+                    </div>
+              {% endif%}
+
+            </div>
+        </div>
+    </div>
+    <br>
+    <!-- Верхняя часть футера -->
+    <div class="row" align="center">
+      {% if request.user.is_authenticated %}
+          <div class="col col-sm-6 col-md-6 col-lg-6 col-xl-6">
+              <form action="{% url 'mathem:add_task' %}" method="post">
+                  {% csrf_token %}
+                  <button class="btn btn-primary" type="submit">Добавить задачу</button>
+
+              </form>
+          </div>
+
+          <div class="col col-sm-6 col-md-6 col-lg-6 col-xl-6">
+            <form action="{% url 'mathem:manyuser' %}" method="post">
+            {% csrf_token %}
+                <button class="btn btn-primary" type="submit">Посчитать количество пользователей</button>
+            </form>
+          </div>
+      {% endif%}
+
+    </div>
+
+    <div class="row" align="center">
+          <div class="col col-sm-6 col-md-6 col-lg-6 col-xl-6">
+
+          </div>
+          <div class="col col-sm-6 col-md-6 col-lg-6 col-xl-6">
+            {% if visi_ %}
+                <div class="alert alert-info" role="alert">
+                    <strong>Запрос выполнен!</strong> В данный момент на сайте зарегестировано {{users}} пользователей
+                </div>
+            {%endif%}
+          </div>
+
+    </div>
+</div>
+{% endblock%}

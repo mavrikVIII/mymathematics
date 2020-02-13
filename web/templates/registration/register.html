@@ -1,0 +1,35 @@
+<DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <title>REGISTER </title>
+</head>
+<body>
+
+<p>
+<h2>REGISTER</h2>
+</p>
+<form action="{% url 'registration:register' %}" method="POST">
+    {% csrf_token %}
+    <input type="email" required placeholder="email" name="email" colls="100" rows="1">
+    <br><br>
+
+   <input type="text" required placeholder="Логин" name="login" colls="100", rows="1"><br>
+    <br><br>
+
+    <input type="password" required placeholder="Пароль" name="password" colls="100", rows="1"><br>
+    <br><br>
+
+    <button type="submit">Зарегестрировать</button> <br>
+    <br>
+
+     <textarea type="text" placeholder="Кол-во"  name="users" colls="100" rows="5">{{text}}</textarea>
+     <p style="visibility:{{visi}}">
+          {{text}}
+     </p>
+</form>
+
+
+</body>
+</html>
+</DOCTYPE>
