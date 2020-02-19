@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect
 from django.shortcuts import HttpResponse
-from .models import Question, Comment, PeoplesErrors
+from .models import Question, Comment, PeoplesErrors, Profile
 from django.http import Http404,HttpResponseRedirect
 from django.urls import reverse
 from django.utils import timezone
@@ -16,35 +16,72 @@ def it_is_admin(request):
     else:
         is_admin = False
     return is_admin
-
+#Преобразует строку в массив целых чисел - ВСПОМАГАТЕЛЬНАЯ ФУНКЦИЯ
+def TextToMass(s):
+    s = s.replace('[','')
+    s = s.replace(']','')
+    b = []
+    a = s.split(', ')
+    for i in a:
+        b.append(int(i))
+    return b
+#Возвращает список решенных пользователем задач - ВСПОМАГАТЕЛЬНАЯ ФУНКЦИЯ
+def ReturnList(request):
+    if request.user.is_authenticated:
+        username = request.user
+        b = Profile.objects.get( user = username )
+        if b.solved_task:
+            list = b.solved_task
+            list = TextToMass(list)
+        else:
+            list = []
+    else:
+        list = []
+    return list
 
 def detail(request,question_id):
     # try:
     #     a=Question.objects.get(id=question_id)
     # except:
     #     raise Http404('Статья не найдена')
-    a = get_object_or_404(Question, id = question_id)
+    usernmane = request.user
+    user_id = usernmane.id
+    b = get_object_or_404(Profile, id = user_id)
+    list_finish_question = b.solved_task
+    list_finish_question = list(set(TextToMass(list_finish_question)))
+
+    a = get_object_or_404(Question, id = question_id)  # это строка замена 4-ем строкам сверху
     is_admin = it_is_admin(request)
     latest_comment_list = a.comment_set.order_by('id')[:10]
-    return render(request, 'mathem/detail.html',{'question':a,  'latest_comment_list':latest_comment_list, 'is_admin':is_admin})
+    context = {'usernmane': usernmane,'question':a,  'latest_comment_list':latest_comment_list, 'is_admin':is_admin, 'list_finish_question':list_finish_question }
+    return render(request, 'mathem/detail.html',context)
+
 
 def leave_answer(request,question_id):
-    # try:
-    #     a = Question.objects.get(id=question_id)
-    # except:
-    #     raise Http404('Задача не найдена')
+
     a = get_object_or_404(Question, id = question_id) # это строка замена 4-ем строкам сверху
+
+    list = ReturnList(request)
     user_answer=request.POST.get('answer')
+
     latest_comment_list = a.comment_set.order_by('id')[:10]
-    
+
     is_admin = it_is_admin(request)
     visible_ = True
+
     if user_answer==str(a.answer_text):
+
         results='Вы ответили правильно!'
+        list.append(question_id)
+        b = Profile.objects.get( user = request.user )
+        b.solved_task = str(list)
+        b.save()
         get_result = True
+
     else:
         results='Вы ответили неправильно'
         get_result = False
+
     context={'question': a, 'result': results, 'get_result':get_result, 'visible_':visible_, 'latest_comment_list':latest_comment_list, 'is_admin':is_admin}
     return render(request, 'mathem/detail.html', context)
 
@@ -62,21 +99,9 @@ def task_add_in(request):
 
     return redirect('..')
 
-def manyuser(request):
-    users = User.objects.count()
-    this_user=request.user
-    # this_id=this_user.id
-    if users:
-        visi_=True
-    context={'users':users,'visi_':visi_,}
-    #return HttpResponseRedirect(reverse('registration:index' ),context)
-    return render(request,'registration/index.html',context)
 
 def change_question(request, question_id):
-    # try:
-    #     a = Question.objects.get(id=question_id)
-    # except:
-    #     raise Http404('Задача не найдена');
+
     a = get_object_or_404(Question, id = question_id)
     username = request.user
     user_question_title=a.question_title
@@ -86,10 +111,7 @@ def change_question(request, question_id):
     return render(request,'mathem/edit.html',context)
 
 def save_edit_question(request, question_id):
-    # try:
-    #     a = Question.objects.get(id=question_id)
-    # except:
-    #     raise Http404('Задача не найдена')
+
     a = get_object_or_404(Question, id = question_id)
     user_question_title=request.POST['edit_title']
     user_question_text=request.POST['edit_text']
@@ -104,10 +126,7 @@ def save_edit_question(request, question_id):
     return redirect('..')
 
 def leave_comment(request,question_id):
-    # try:
-    #     a = Question.objects.get(id=question_id)
-    # except:
-    #     raise Http404('Задача не найдена')
+
     a = get_object_or_404(Question, id = question_id)
     now=timezone.now()
     a.comment_set.create( author_name = request.user, comment_text=request.POST['text_comment'], pub_date=now)
@@ -117,29 +136,46 @@ def leave_comment(request,question_id):
 
 def report_error(request, question_id):
 
-    # try:
-    #     a = Question.objects.get(id=question_id)
-    # except:
-    #     raise Http404('Задача не найдена')
+
     a = get_object_or_404(Question, id = question_id)
     people_user=request.user
     time_now = timezone.now()
     people_errors = request.POST['text_error']
     visible = True
 
-
-    # s = PeoplesErrors(people_name = people_user, people_message = people_errors, date_message = time_now)
     a.peopleserrors_set.create(people_name = people_user, people_message = people_errors, date_message = time_now)
-    # s.save()
-    # context = {'alert_message': alert_message, 'visible': visible}
+
     return HttpResponseRedirect(reverse('mathem:detail',args=(a.id,)))
-    # return render(request, 'mathem/detail.html', context)
+
 
 def views_errors(request,question_id):
-    # try:
-    #     a = Question.objects.get(id=question_id)
-    # except:
-    #     raise Http404('Задача не найдена')
+
     a = get_object_or_404(Question, id = question_id)
     errors_all = PeoplesErrors.objects.all()
     return render(request, 'mathem/report_errors.html', {'errors_all': errors_all})
+#доп ф-я
+def id_questuins(request):
+    question_list_all = Question.objects.all()
+    question_list_all_id = []
+    for i in question_list_all:
+         question_list_all_id.append(i.id)
+    return question_list_all_id
+
+def see_profile(request):
+
+
+
+     user_name = request.user
+     user_id = user_name.id
+     a = get_object_or_404(Profile, id = user_id)
+
+     list_finish_question = a.solved_task
+
+     list_finish_question = list(set(TextToMass(list_finish_question)))
+     # list_finish_question = list(set(list_finish_question))
+
+     question_list_all_id = id_questuins(request)
+     question_not_finished = set(question_list_all_id) - set(list_finish_question)
+     context = {'user': user_name, 'list_finish_question': list_finish_question, 'question_not_finished':question_not_finished}
+
+     return render(request, 'mathem/profile.html',context)

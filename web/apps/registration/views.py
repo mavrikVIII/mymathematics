@@ -12,11 +12,11 @@ from django import forms
 # Create your views here.
 def index(request):
     latest_question_list=Question.objects.all() #order_by
-
+    
     username = 'пользователь'
     if request.user.is_authenticated:
         username = request.user
-    
+
     context = {'user_name': username, 'latest_question_list':latest_question_list }
     return render(request, 'registration/index.html', context)
 

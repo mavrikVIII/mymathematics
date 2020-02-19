@@ -1,5 +1,4 @@
 from django.db import models
-
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -25,7 +24,10 @@ class Comment(models.Model):
     pub_date = models.DateTimeField('Дата публикации')
 
     def __str__(self):
-        return self.author_name
+        a = self.author_name
+        b = self.comment_text
+        c = '%s : %s'%(a,b)
+        return c
 
     class Meta:
         verbose_name = 'Комментарий'
@@ -44,3 +46,23 @@ class PeoplesErrors(models.Model):
     class Meta:
         verbose_name = 'Ошибка'
         verbose_name_plural='Ошибки'
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    solved_task = models.TextField(max_length=500, blank=True)
+
+    def __str__(self):
+        return str(self.solved_task)
+
+    class Meta:
+        verbose_name = 'Профиль'
+        verbose_name_plural = 'Профили'
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    instance.profile.save()

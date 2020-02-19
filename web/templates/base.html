@@ -15,7 +15,32 @@
 </head>
 <body background = "media\images\2.jpg">
 {% block main  %}
+<div class="container-fluir">
+    <div class="row" style="background-color:#17a2b8!important" >
+            <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+               <h3 >  <a style="color:white; padding-left:10px" href="{% url 'registration:index' %}">Mathematics</a> </h3>
+            </div>
+        {% if request.user.is_authenticated %}
+            <div class="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-3" >
 
+            </div>
+            <div class="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-2" align = "right">
+                  <a href="{% url 'mathem:see_profile' %}" style="color:white">{{request.user}}</a>
+            </div>
+            <div class="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-1" align="right" style="padding-right:45px" >
+                <a style="color:white " href="{% url 'registration:logout' %}">Выйти</a>
+            </div>
+        {% else %}
+            <div class="col col-sm-3 col-md-4 col-lg-4 col-xl-4" align="right">
+                    <a  style="color:white " href="{% url 'registration:register' %}">Зарегистрироваться</a>
+            </div>
+            <div class="col col-sm-3 col-md-2 col-lg-2 col-xl-1" align="right">
+
+                  <a style="color:white "href="{% url 'registration:login' %}">Войти</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}
 
 {%block content%}
@@ -24,6 +49,7 @@
 {% block footer%}
 
 
+<div class="container">
 
         <nav class="navbar fixed-bottom navbar-dark bg-primary">
           <div align="center">
@@ -31,6 +57,7 @@
           </div>
         </nav>
 
+      </div>
 
 {%endblock%}
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>

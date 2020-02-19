@@ -7,12 +7,15 @@
 
 <div class="container-fluir">
     <div class="row" style="background-color:#17a2b8!important" >
-        <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
-           <h3 >  <a style="color:white; padding-left:10px" href="{% url 'registration:index' %}">Mathematics</a> </h3>
-        </div>
+            <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+               <h3 >  <a style="color:white; padding-left:10px" href="{% url 'registration:index' %}">Mathematics</a> </h3>
+            </div>
         {% if request.user.is_authenticated %}
-            <div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-5">
+            <div class="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-3" >
 
+            </div>
+            <div class="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-2" align = "right">
+                  <a href="{% url 'mathem:see_profile' %}" style="color:white">{{user_name}}</a>
             </div>
             <div class="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-1" align="right" style="padding-right:45px" >
                 <a style="color:white " href="{% url 'registration:logout' %}">Выйти</a>
@@ -80,12 +83,7 @@
               </form>
           </div>
 
-          <div class="col col-sm-6 col-md-6 col-lg-6 col-xl-6">
-            <form action="{% url 'mathem:manyuser' %}" method="post">
-            {% csrf_token %}
-                <button class="btn btn-primary" type="submit">Посчитать количество пользователей</button>
-            </form>
-          </div>
+
       {% endif%}
 
     </div>

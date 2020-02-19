@@ -6,7 +6,7 @@
 <!-- Шапка -->
 <div class="container-fluid">
 
-  <div class="row" style="background-color:#17a2b8!important">
+  <!-- <div class="row" style="background-color:#17a2b8!important">
       <div class="col col-sm-6 col-md-6 col-lg-6 col-xl-6">
       <h3>
         <p class="bg-info text-white " style="padding-left:2%">
@@ -20,7 +20,7 @@
     <div class="col col-sm-2 col-md-2 col-lg-2 col-xl-2" align="right" style="padding-right:25px">
           <a href="{% url 'registration:index' %}" style="margin:1%" class="btn btn-dark">На главную</a>
     </div>
-  </div>
+  </div> -->
 
 
   <div class="row justify-content-center">
@@ -30,12 +30,13 @@
     </div>
     <div class="col" align="right" style="margin:1% ">
           {% if request.user.is_authenticated %}
-          <form action="{% url 'mathem:change_question' question.id %}" method="POST">
-            {% csrf_token %}
-            <button type="submit">Редактировать задачу</button>
+            {%if is_admin %}
+                  <form action="{% url 'mathem:change_question' question.id %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit">Редактировать задачу</button>
 
-          </form>
-
+                  </form>
+            {% endif %}
           {% endif%}
 
         </div>
@@ -47,10 +48,19 @@
         <div class="col-5 col-sm-5 col-md-5 col-lg-5 col-xl-5" >
           <form action="{% url 'mathem:leave_answer' question.id %}" method="POST">
             {% csrf_token %}
+            <!-- {{question.id}} {{list_finish_question}} {{usernmane}} -->
+            {% if question.id in list_finish_question %}
+            <p class=" alert alert-success w-50" role="alert" >
+                <strong>Вы уже решили эту задачу!</strong>{{result}}
+            </p>
+            {% else %}
+                <input type="text" class="form-control form-control-sm w-50" required placeholder="Ваш ответ" name="answer" colls="30" , rows="1"><br>
+                <button type="submit" class="btn btn-outline-success">Оставить ответ</button>
+            {% endif %}
 
-            <input type="text" class="form-control form-control-sm w-50" required placeholder="Ваш ответ" name="answer" colls="30" , rows="1"><br>
 
-            <button type="submit" class="btn btn-outline-success">Оставить ответ</button>
+
+
 
           </form>
         </div>
@@ -114,6 +124,7 @@
         <div class="col col-sm-2 col-md-2 col-lg-2 col-xl-2">
           <button type="button" class="btn btn-primary w-95" data-toggle="modal" data-target="#exampleModalCentered">
               Сообщить об ошибке
+
           </button>
 
                 <!-- Modal -->
@@ -133,6 +144,7 @@
                                             {% csrf_token %}
                                             <textarea type ='text' class="form-control mb-2 mr-sm-2" name="text_error" rows="5" cols="63"></textarea>
                                             <button type="submit" class="btn btn-secondary">Отправить</button>
+
                                         </form>
 
                                   </div>
