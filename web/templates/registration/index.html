@@ -5,7 +5,7 @@
 {% block main %}
 <!-- Шапка -->
 
-<div class="container-fluir">
+<div class="container-fluid">
     <div class="row" style="background-color:#17a2b8!important" >
             <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
                <h3 >  <a style="color:white; padding-left:10px" href="{% url 'registration:index' %}">Mathematics</a> </h3>
@@ -55,11 +55,29 @@
                       <div class="col col-sm-6 col-md-6 col-lg-6 col-xl-6" >
                         <table align="center">
                             {% for a in latest_question_list %}
-                          <tr align="center">
-                            <td style="color:white">  {{a.id}}. </td>
-                            <td><a style="color:white"href="{% url 'mathem:detail' a.id %}">{{a.question_title}}</a></td>
-                          </tr>
-                          {%endfor%}
+                                {% if a.id in list_finish_question %}
+                                      <tr align="center" style = 'background:green'>
+                                          <td style="color:white">  {{a.id}}. </td>
+                                          <td width='50px'></td>
+
+                                          <td><a style="color:white"href="{% url 'mathem:detail' a.id %}">{{a.question_title}}</a></td>
+                                      </tr>
+                                {% elif a.id in list_false_finished_question %}
+                                      <tr align="center" style = 'background:red'>
+                                          <td style="color:white">  {{a.id}}. </td>
+                                          <td width='50px'></td>
+
+                                          <td><a style="color:white"href="{% url 'mathem:detail' a.id %}">{{a.question_title}}</a></td>
+                                      </tr>
+                                {% else %}
+                                      <tr align="center" >
+                                          <td style="color:white">  {{a.id}}. </td>
+                                          <td width='50px'></td>
+
+                                          <td><a style="color:white"href="{% url 'mathem:detail' a.id %}">{{a.question_title}}</a></td>
+                                      </tr>
+                                {% endif %}
+                            {%endfor%}
                         </table>
                       </div>
                 {% else %}

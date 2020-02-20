@@ -8,6 +8,17 @@ from django.contrib.auth.models import User
 from registration.views import index
 from django.shortcuts import get_object_or_404
 
+#доп функция для определения количества неправильных ответов
+def wrong_solved(solved_list,list_wrong):
+    # solved_list = list(solved_list)
+    # list_wrong = list(list_wrong)
+    i = 0
+    while i < len(list_wrong):
+        if list_wrong[i] in solved_list:
+            list_wrong.remove(list_wrong[i])
+        else:
+            i+=1
+    return list_wrong
 #доп ф-я для проверки администратора
 def it_is_admin(request):
     username=request.user
@@ -18,8 +29,11 @@ def it_is_admin(request):
     return is_admin
 #Преобразует строку в массив целых чисел - ВСПОМАГАТЕЛЬНАЯ ФУНКЦИЯ
 def TextToMass(s):
-    s = s.replace('[','')
-    s = s.replace(']','')
+    s = s.replace('{','')
+    s = s.replace('}','')
+    s = s.replace('set','')
+    s = s.replace('(','')
+    s = s.replace(')','')
     b = []
     a = s.split(', ')
     for i in a:
@@ -31,24 +45,45 @@ def ReturnList(request):
         username = request.user
         b = Profile.objects.get( user = username )
         if b.solved_task:
-            list = b.solved_task
-            list = TextToMass(list)
+            solved_list = b.solved_task
+            solved_list = TextToMass(solved_list)
         else:
-            list = []
+            solved_list = []
     else:
-        list = []
-    return list
+        solved_list = []
+    return solved_list
+# доп ф-я для ошибочных ответов
+def ReturnListWrong(request):
+    if request.user.is_authenticated:
+        username = request.user
+        b = Profile.objects.get( user = username )
+        solved_list = b.solved_task
+        if b.wrong_solved_task:
+            list_wrong = b.wrong_solved_task
+            list_wrong = TextToMass(list_wrong)
+        else:
+            list_wrong = []
+    else:
+        list_wrong = []
+    return list_wrong
 
 def detail(request,question_id):
     # try:
     #     a=Question.objects.get(id=question_id)
     # except:
     #     raise Http404('Статья не найдена')
-    usernmane = request.user
-    user_id = usernmane.id
-    b = get_object_or_404(Profile, id = user_id)
-    list_finish_question = b.solved_task
-    list_finish_question = list(set(TextToMass(list_finish_question)))
+    if request.user.is_authenticated:
+        usernmane = request.user
+        user_id = usernmane.id
+        b = get_object_or_404(Profile, id = user_id)
+        list_finish_question = b.solved_task
+        if list_finish_question:
+            list_finish_question = TextToMass(list_finish_question)
+        else:
+            list_finish_question = []
+    else:
+        usernmane = 'Пользователь'
+        list_finish_question = []
 
     a = get_object_or_404(Question, id = question_id)  # это строка замена 4-ем строкам сверху
     is_admin = it_is_admin(request)
@@ -61,29 +96,47 @@ def leave_answer(request,question_id):
 
     a = get_object_or_404(Question, id = question_id) # это строка замена 4-ем строкам сверху
 
-    list = ReturnList(request)
-    user_answer=request.POST.get('answer')
+    solved_list = ReturnList(request)
+    list_wrong = ReturnListWrong(request)
 
+    user_answer=request.POST.get('answer')
     latest_comment_list = a.comment_set.order_by('id')[:10]
 
     is_admin = it_is_admin(request)
     visible_ = True
-
+    b = Profile.objects.get( user = request.user )
     if user_answer==str(a.answer_text):
 
         results='Вы ответили правильно!'
-        list.append(question_id)
-        b = Profile.objects.get( user = request.user )
-        b.solved_task = str(list)
+        solved_list.append(question_id)
+        b.solved_task = str(set(solved_list))
+        if (question_id in solved_list) and (question_id in list_wrong):
+            list_wrong = wrong_solved(solved_list, list_wrong)
+            if not list_wrong:
+                b.wrong_solved_task = '{0}'
+                b.save()
+            else:
+                b.wrong_solved_task = str(set(list_wrong))
+                b.save()
         b.save()
         get_result = True
-
     else:
+        solved_list = ReturnList(request)
+        list_wrong.append(question_id)
+        if not list_wrong:
+            b.wrong_solved_task = '{0}'
+            b.save()
+        else:
+            b.wrong_solved_task = str(set(list_wrong))
+            b.save()
+
+        b.save()
         results='Вы ответили неправильно'
         get_result = False
 
     context={'question': a, 'result': results, 'get_result':get_result, 'visible_':visible_, 'latest_comment_list':latest_comment_list, 'is_admin':is_admin}
     return render(request, 'mathem/detail.html', context)
+
 
 def add_task(request):
     return render(request, 'mathem/addTask.html')
@@ -165,17 +218,18 @@ def see_profile(request):
 
 
 
-     user_name = request.user
-     user_id = user_name.id
-     a = get_object_or_404(Profile, id = user_id)
+    user_name = request.user
+    user_id = user_name.id
+    a = get_object_or_404(Profile, id = user_id)
 
-     list_finish_question = a.solved_task
+    list_finish_question = a.solved_task
+    if list_finish_question:
+        list_finish_question = list(set(TextToMass(list_finish_question)))
+    else:
+        list_finish_question = []
 
-     list_finish_question = list(set(TextToMass(list_finish_question)))
-     # list_finish_question = list(set(list_finish_question))
+    question_list_all_id = id_questuins(request)
+    question_not_finished = set(question_list_all_id) - set(list_finish_question)
+    context = {'user': user_name, 'list_finish_question': list_finish_question, 'question_not_finished':question_not_finished}
 
-     question_list_all_id = id_questuins(request)
-     question_not_finished = set(question_list_all_id) - set(list_finish_question)
-     context = {'user': user_name, 'list_finish_question': list_finish_question, 'question_not_finished':question_not_finished}
-
-     return render(request, 'mathem/profile.html',context)
+    return render(request, 'mathem/profile.html',context)

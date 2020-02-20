@@ -50,9 +50,10 @@ class PeoplesErrors(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     solved_task = models.TextField(max_length=500, blank=True)
+    wrong_solved_task = models.TextField(max_length = 500, blank = True)
 
     def __str__(self):
-        return str(self.solved_task)
+        return str(self.user)
 
     class Meta:
         verbose_name = 'Профиль'
